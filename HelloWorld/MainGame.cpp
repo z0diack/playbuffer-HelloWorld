@@ -24,28 +24,17 @@ void HandlePlayerControls();
 void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
 {
 	Play::CreateManager( DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_SCALE );
+	Play::CentreAllSpriteOrigins();
+	Play::LoadBackground("Data\\Backgrounds\\background.png");
+	Play::StartAudioLoop("music");
+	Play::CreateGameObject(TYPE_AGENT8, { 115,0 }, 50, "agent8");
 }
 
 // Called by PlayBuffer every frame (60 times a second!), same as update in Unity
 bool MainGameUpdate( float elapsedTime )
 {
-	// timer += Time.deltaTime in unity
-	gameState.timer += elapsedTime;
-	Play::ClearDrawingBuffer( Play::cOrange );
-
-	// Changed where the sprites are being loaded for now.
-	Play::DrawDebugText(
-		{ DISPLAY_WIDTH / 3, DISPLAY_HEIGHT / 3 },
-		Play::GetSpriteName(gameState.spriteId),
-		Play::cWhite);
-
-	Play::DrawSprite(gameState.spriteId, Play::GetMousePos(), gameState.timer);
-
-	if (Play::KeyPressed(VK_SPACE)) {
-		gameState.spriteId++;
-	}
-
-	Play::DrawDebugText( { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 }, "Hello World!" );
+	Play::DrawBackground();
+	HandlePlayerControls();
 	Play::PresentDrawingBuffer();
 	return Play::KeyDown( VK_ESCAPE );
 }
