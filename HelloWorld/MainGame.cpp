@@ -14,9 +14,11 @@ struct GameState
 GameState gameState;
 
 enum GameObjectTupe {
-
+	TYPE_NULL = -1,
+	TYPE_AGENT8,
 };
 
+void HandlePlayerControls();
 
 // The entry point for a PlayBuffer program, Start/Awake
 void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
@@ -55,3 +57,43 @@ int MainGameExit( void )
 	return PLAY_OK;
 }
 
+void HandlePlayerControls() 
+{
+	// Loads in the Agent GameObject
+	GameObject& obj_agent8 = Play::GetGameObjectByType(TYPE_AGENT8);
+
+	// If up arrow is pressed, the agent will change sprite to the climbing animation, as well as change velocity to go up.
+	if (Play::KeyDown(VK_UP)) 
+	{
+		obj_agent8.velocity = { 0,-4 };
+		Play::SetSprite(obj_agent8, "agent8_climb", 0.25f);
+	}
+
+	// If down arrow is velocity will change to accellerate at a rate of -1 on the y axis each frame, and change sprite to be falling animation.
+	else if (Play::KeyDown(VK_DOWN)) 
+	{
+		obj_agent8.acceleration = { 0,1 };
+		Play::SetSprite(obj_agent8, "agent8_fall",0);
+	}
+
+	// If up/down arrow is not pressed, the sprite will change to hang animation, then multiply the velocity by 50% each frame.
+	else 
+	{
+		Play::SetSprite(obj_agent8, "agent8_hang", 0.0f);
+		obj_agent8.velocity *= 0.5f;
+		obj_agent8.acceleration = { 0,0 };
+	}
+
+	// Used to save new and old pos, can change the velocity,pos,rotation of the agent. As well as saves animation frame update speed.
+	Play::UpdateGameObject(obj_agent8);
+
+	if (Play::IsLeavingDisplayArea(obj_agent8)){
+		obj_agent8.pos = obj_agent8.oldPos;
+	}
+	
+	// Draws a debug line from the left to right
+	Play::DrawLine({ obj_agent8.pos.x, 0 }, obj_agent8.pos, Play::cWhite);
+
+	// Slower than DrawObject but is used if the rotation/scale is required.
+	Play::DrawObjectRotated(obj_agent8);
+}
