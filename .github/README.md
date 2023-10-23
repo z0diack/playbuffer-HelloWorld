@@ -1,3 +1,7 @@
+## Taken from Sumo Digital to complete
+# Jake Vardy
+
+
 
 ![](/.github/images/playbuffer_title.png)
 ## A single-header C++ library for making simple 2D games 
