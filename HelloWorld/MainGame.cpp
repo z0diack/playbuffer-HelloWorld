@@ -138,6 +138,8 @@ void UpdateFan()
 		}
 		Play::PlayAudio("tool");
 	}
+	
+	// Generates a number between 1-150, if == 1 it creates a coin for the player to grab
 	if (Play::RandomRoll(150) == 1) 
 	{
 		int id = Play::CreateGameObject(TYPE_COIN, obj_fan.pos, 40, "coin");
@@ -188,3 +190,57 @@ void UpdateTools()
 	}
 }
 
+void UpdateCoinsAndStars()
+{
+	GameObject& obj_agent8 = Play::GetGameObjectByType(TYPE_AGENT8);
+	std::vector<int> vCoins = Play::CollectGameObjectIDsByType(TYPE_COIN);
+
+	for (int id_coin : vCoins)
+	{
+		GameObject& obj_coin = Play::GetGameObject(id_coin);
+		bool hasCollided = false;
+
+		// Checking if the coin has collided with the player
+		if (Play::IsColliding(obj_coin, obj_agent8)) 
+		{
+			for (float rad{ 0.25f }; rad < 2.0f; rad += 0.5f)
+			{
+				// Spawns in stars evenly around the coin once the coin has been collided with.
+				int id = Play::CreateGameObject(TYPE_STAR, obj_agent8.pos, 0, "star");
+				GameObject& obj_star = Play::GetGameObject(id);
+				obj_star.rotSpeed = 0.1f;
+				obj_star.acceleration = { 0.0f,0.5f };
+				Play::SetGameObjectDirection(obj_star, 16, rad * PLAY_PI);
+			}
+
+			hasCollided = true;
+			// Adds score to player and plays audio.
+			gameState.score += 500;
+			Play::PlayAudio("collect");
+		}
+
+		Play::UpdateGameObject(obj_coin);
+		Play::DrawObjectRotated(obj_coin);
+
+		if (!Play::IsVisible(obj_coin) || hasCollided)
+		{
+			Play::DestroyGameObject(id_coin);
+		}
+	}
+
+	std::vector<int> vStars = Play::CollectGameObjectIDsByType(TYPE_STAR);
+
+	for (int id_star : vStars) 
+	{
+		GameObject& obj_star = Play::GetGameObject(id_star);
+
+		Play::UpdateGameObject(obj_star);
+		Play::DrawObjectRotated(obj_star);
+
+		// if its not visible will destory the stars
+		if (!Play::IsVisible(obj_star))
+		{
+			Play::DestroyGameObject(id_star);
+		}
+	}
+}
